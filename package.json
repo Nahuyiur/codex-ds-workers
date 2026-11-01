@@ -1,0 +1,12 @@
+{
+  "name": "codex-ds-workers",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portable thin bootstrap for bounded DeepSeek workers in Codex",
+  "license": "MIT",
+  "engines": {"node": ">=24"},
+  "bin": {"codex-ds-workers": "bin/codex-ds-workers.mjs"},
+  "scripts": {"test": "node --test test/*.test.mjs"},
+  "files": ["bin/", "lib/", "adapters/", "runtime/", "skills/", "LICENSE", "THIRD_PARTY_NOTICES.md", "README.md"]
+}

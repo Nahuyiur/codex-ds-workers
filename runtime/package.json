@@ -1,0 +1,6 @@
+{
+  "name": "codex-ds-workers-sdk",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {"@deepseek-ai/dsh": "0.2.1-rc.5"}
+}

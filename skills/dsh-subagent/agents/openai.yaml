@@ -1,0 +1,11 @@
+interface:
+  display_name: "DSH Subagent"
+  short_description: "Adaptive DS execution with parent review and refinement"
+  default_prompt: "Use $dsh-subagent to choose bounded DeepSeek work, keep parent ownership clear, and review the result with a bounded correction round."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "dsh_subagent"
+      description: "Persistent DSH agents with progress, wait and cancellation"
+policy:
+  allow_implicit_invocation: true

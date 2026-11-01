@@ -1,0 +1,18 @@
+{
+  "platform": "darwin",
+  "node": "24.22.2",
+  "model_requests": 0,
+  "temporary_home": true,
+  "checks": {
+    "setup": true,
+    "private_owned_paths_and_no_saved_key": true,
+    "codex_registration": true,
+    "no_active_tasks": true,
+    "authenticated_rpc": true,
+    "repeat_setup": true,
+    "setup_after_stopped_service": true,
+    "doctor_command": true,
+    "uninstall_registration_and_skill_history_retained": true
+  },
+  "pass": true
+}
