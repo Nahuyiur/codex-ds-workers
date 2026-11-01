@@ -97,6 +97,8 @@ Run these commands from the checkout:
 | `node bin/codex-ds-workers.mjs rpc < request.json` | Call a bridge tool through JSON stdin |
 | `node bin/codex-ds-workers.mjs uninstall` | Remove the owned integration; retain keys and history |
 
+Hosted CI is not enabled in this release. Run `npm test` locally; see [development checks](CONTRIBUTING.md).
+
 Same-session follow-ups keep their original model and effort; changing effort requires a new session with a concise handoff. On cancellation, interrupt the external DS worker and verify acknowledgement. Stopping a Codex turn alone does not establish that DS stopped.
 
 [Installation and recovery](docs/install.md) · [Task and result contracts](skills/dsh-subagent/references/handoffs.md) · [Development checks](CONTRIBUTING.md)

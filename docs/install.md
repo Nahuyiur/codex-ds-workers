@@ -4,7 +4,7 @@
 
 Use Node.js 24 or newer with npm, Git, and network access to GitHub and npm. Your Codex login remains in Codex; DeepSeek workers use their own API key. The installer can prepare the bridge's pinned Codex CLI when no compatible CLI is available.
 
-The initial release targets macOS and Linux. Development checks and the real isolated setup were performed on macOS; Linux installation and desktop callback behavior need their own host validation. Offline CI is configured for both platforms, but a configured workflow is not a completed CI run. Windows is not a validated target for this release.
+The initial release targets macOS and Linux. Development checks and the real isolated setup were performed on macOS; Linux installation and desktop callback behavior need their own host validation. Hosted CI is not enabled in this release. Run `npm test` locally. Windows is not a validated target for this release.
 
 The [keyless installation receipt](verification.json) records the tested lifecycle. It verifies SDK initialization and authenticated local RPC, not a paid provider call or a real-key configuration write in this portable package.
 

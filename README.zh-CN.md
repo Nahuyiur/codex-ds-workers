@@ -67,4 +67,6 @@ node bin/codex-ds-workers.mjs uninstall
 
 安装、目录位置与故障恢复见[安装说明](docs/install.md)，原理见[协作流程](docs/workflow.md)，速度与质量证据见[评测记录](docs/evaluation.md)。目前没有证明这套流程普遍快于 Luna。
 
+此版本暂未启用 GitHub 自动测试，可在仓库目录运行 `npm test` 做本地验证。
+
 MIT 许可。底层来源与适配说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
