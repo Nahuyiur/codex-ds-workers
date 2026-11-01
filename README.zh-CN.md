@@ -1,20 +1,46 @@
 <p align="center">
-  <img src="docs/assets/workflow.svg" alt="Codex 拆分任务，两个 DeepSeek worker 在独立工作区执行，主 agent 审查后接入。" width="100%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
+    <img src="docs/assets/hero.svg" alt="Codex 负责判断，DeepSeek 负责执行。独立任务、持久 worker、主 agent 验收。" width="100%">
+  </picture>
 </p>
 
-# Codex DS Workers
+<h1 align="center">Codex DS Workers</h1>
 
-**让 Codex 负责判断，让 DeepSeek 并行执行，结果由主 agent 验收。**
+<p align="center">
+  在 Codex 工作流中使用持久的 DeepSeek worker。<br>
+  <strong>把独立任务交出去，把判断和验收留在 Codex。</strong>
+</p>
 
-[English](README.md) · [协作流程](docs/workflow.md) · [实测与边界](docs/evaluation.md)
+<p align="center">
+  <a href="#开始使用">开始使用</a> &nbsp; / &nbsp;
+  <a href="#协作方式">协作方式</a> &nbsp; / &nbsp;
+  <a href="docs/evaluation.md">实测与边界</a> &nbsp; / &nbsp;
+  <a href="README.md">English</a>
+</p>
 
-这套 skill 把适合独立完成的任务交给持久 DS worker。主 agent 负责拆分、关键难点、审查和集成，并在发现具体问题后进行有限轮次的修复。
+<p align="center">
+  <a href="docs/install.md"><img src="docs/assets/badge-node.svg" alt="需要 Node.js 24 或更新版本"></a>
+  <img src="docs/assets/badge-mcp.svg" alt="Codex skill 与 MCP 集成">
+  <a href="LICENSE"><img src="docs/assets/badge-license.svg" alt="MIT 许可"></a>
+</p>
 
-你需要已有的 Codex 登录，以及一个 **DeepSeek API key**。DS worker 使用独立 API 计费。底层复用 [dsh-subagent-mcp](https://github.com/dqtz5vpvj9-create/dsh-subagent-mcp) 和 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。
+给 worker 一个完整的任务，让 Codex 同时推进主线，结果返回后再审查。worker 会保留会话，发现具体问题时可以在同一会话里继续修复，沿用已有上下文。
+
+| 能力 | 带来的作用 |
+| :--- | :--- |
+| **持久会话** | 继续同一个 worker 的任务，无需重新交代全部上下文。 |
+| **隔离执行** | 派发前划定文件归属，并为写入任务分配独立工作区。 |
+| **按任务选择 effort** | 根据有界任务的难度，明确选择 `low`、`high` 或 `max`。 |
+| **主 agent 验收** | 接受修改前核对契约、实际 diff 和失败路径。 |
 
 ## 开始使用
 
-准备 Node.js 24+、npm、Git，以及 GitHub/npm 网络访问。初始面向 macOS 和 Linux；平台验证范围与旧安装冲突见[安装说明](docs/install.md)。
+准备 **Node.js 24+、npm、Git**、已有的 **Codex 登录**和 **DeepSeek API key**，并确保能访问 GitHub 与 npm。DeepSeek 调用使用独立 API 计费。
+
+初始面向 macOS 和 Linux。仓库记录了 macOS 隔离安装验证；Linux 仍需要对应主机的验证。详见[平台覆盖与安装说明](docs/install.md)。
+
+### 1. 安装与配置
 
 ```bash
 git clone https://github.com/Nahuyiur/codex-ds-workers.git
@@ -24,49 +50,111 @@ node bin/codex-ds-workers.mjs configure
 node bin/codex-ds-workers.mjs doctor
 ```
 
-`setup` 安装固定版本的 bridge/SDK、注册本地 MCP 并安装 skill，不提交模型任务。`configure` 在终端私密输入 key，不需要把 key 写进命令或聊天。安装后保留仓库目录，启动器和适配器仍会使用它。
+`setup` 安装固定版本的 bridge 和 SDK、注册本地 MCP server 并安装 skill，不提交模型任务。`configure` 在终端提示你私密输入 key，不需要把 key 放进命令或聊天。
 
-打开一条新的 Codex 聊天，让工具和 skill 加载。先试一次只读调查：
+安装后保留仓库目录，后续维护命令仍会使用其中的启动器。如果已有 `dsh_subagent` 安装，setup 会保留旧安装，并在冲突时停止。详见[隔离配置与冲突处理](docs/install.md#existing-installations)。
+
+### 2. 打开新的 Codex 聊天
+
+让新的聊天加载 skill 和 MCP 工具，先试一次只读任务：
 
 ```text
 使用 $dsh-subagent，让一个 DeepSeek worker 只读追踪当前项目的配置加载路径，
 返回文件位置和调用证据。你核对证据后再接受结果。
 ```
 
-正常结果包含可继续追问的 worker ID 和代码证据。DS 活动通常显示为 MCP 工具结果，不一定是原生 GPT 子 agent 卡片。当前聊天没有加载 MCP 时，skill 可使用已安装 CLI 的 `rpc` 路径。
+正常结果包含**可继续追问的 worker ID** 和文件证据。worker 活动可能显示为 MCP 工具结果，不一定是原生 GPT 子 agent 卡片。如果当前聊天没有加载 MCP 工具，skill 可以使用已安装 CLI 的 `rpc` 路径。
 
-## 怎样分工
+## 协作方式
 
-| 主 agent 保留 | 适合交给 DS |
-|---|---|
-| 范围、接口、风险判断 | 有明确范围的代码调查 |
-| 模糊需求、强耦合难点 | 接口固定的独立模块 |
-| 审查、接入、最终验收 | 复现案例、测试与机械修改 |
+<p align="center">
+  <picture>
+    <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/workflow-dark.svg">
+    <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/workflow.svg">
+    <img src="docs/assets/workflow.gif" alt="流程示意动画：Codex 定义任务，两个 DeepSeek worker 并行执行，Codex 审查结果后接入。这是机制示意，不是实际运行录像。" width="100%">
+  </picture>
+</p>
 
-有界执行从 low 起步；已知推理密集任务用 high，max 留给具体难点的升级。特别困难的工作可以交给合适的 GPT 子 agent；能力关系明确时通常不超过主 agent，否则继承主模型。
+<p align="center">
+  <a href="docs/assets/workflow.svg">静态流程图</a> &nbsp; / &nbsp;
+  <a href="docs/assets/workflow.mp4">MP4</a> &nbsp; / &nbsp;
+  <a href="docs/workflow.md">完整协作流程</a>
+</p>
 
-初始最多两个委派执行者，写入工作区必须隔离。先固定公共接口，再启动并行分支。主 agent 同时推进独立主线，谁先完成就先验收。原生中转 agent 与其 DS worker 分别占一个名额。
+Codex 负责范围、公共接口、风险、模型选择和最终验收。DeepSeek 执行有界调查、独立模块、复现案例和机械修改。模糊需求与强耦合推理留给主 agent，或合适的原生 GPT 子 agent。
 
-## 怎样守住质量
+初始**最多两个委派执行者**。先固定公共接口，再给写入任务分配独立工作区；主 agent 继续推进独立主线，谁先完成就先审查。原生中转 agent 与其 DS worker 分别占一个名额。
 
-交接前明确验收命令、关键不变量、允许修改的文件和受保护输入。完成后，主 agent 核对契约、diff 与实际检查，特别检查失败和恢复路径，再做集成验证。
+### 选择 effort
 
-默认集中修复一轮，最多两轮后升级模型、重新拆分或主 agent 接管。**这是协作指令，不是强制调度器，也不能保证绝对无 bug。** 实测里曾出现原有 38 项全通过、仍漏掉契约的情况；父 agent 查看 diff 后发现遗漏，第二轮修复通过了额外四项检查。
+| Effort | 适用任务 |
+| :--- | :--- |
+| `low` | 输入与验收清楚的有界执行，默认从这里开始。 |
+| `high` | 范围明确、但需要较多推理的任务。 |
+| `max` | 已经遇到具体难点，需要针对性升级。 |
 
-可以用 `examples/mini-project` 的临时副本练习两路执行与验收，具体提示词见 [English README](README.md#try-an-isolated-coding-exercise)。这个小例子用于检查接入，不用于证明加速。
+主 agent 明确选择 effort。同会话追问保留原 model、effort 和 preset；改变 effort 需要新会话与简短交接。这是工作策略，不是经过测量的模型能力排名。
 
-## 维护与退出
+### 审查后再接入
 
-```bash
-node bin/codex-ds-workers.mjs status
-node bin/codex-ds-workers.mjs rpc < request.json
-node bin/codex-ds-workers.mjs uninstall
+1. 派发前明确交付物、允许修改的文件、受保护输入和验收命令。
+2. 核对实际 diff 与有意义的检查，覆盖失败和恢复路径。
+3. 对具体缺陷集中给一轮修复意见。最多两轮后升级模型、重新拆分或由主 agent 接管。
+4. 合并已接受的修改，再运行集成检查。
+
+> [!NOTE]
+> skill 提供协作指令，不是强制调度器，也不保证绝对正确。
+
+本地实测中，一次修复通过了原有 **38 项冻结检查**，却仍漏掉一条契约要求。主 agent 审查 diff 后发现遗漏，第二轮修复通过了**额外四项契约检查**。这说明审查闭环可以发挥作用，目前没有证据证明它普遍快于原生 Luna。详见[实测结果、条件与边界](docs/evaluation.md)。
+
+<details>
+<summary><strong>试一遍双 worker 编码练习</strong></summary>
+
+用仓库自带的 Python 微型项目练习隔离交接和验收：
+
+```text
+使用 $dsh-subagent，完成 examples/mini-project 中的接入练习。
+先创建临时副本，把 text.py 和 stats.py 分别交给两个 DS low worker，
+使用独立工作区。保留 README.md、tests/ 和 protected.json。
+分别审查 diff，只合并各自负责的实现文件，再运行 python3 verify.py。
+报告总耗时，以及 provider 能提供的各角色用量。
+不要发布代码或向外发送任何信息。
 ```
 
-同会话追问保留原 model 和 effort；改变 effort 需要新会话与简短交接。停止任务时，需要显式中断外部 DS 并确认回执；停止 Codex 回合本身不能证明 DS 已停止。
+这个刻意缩小的例子用于检查交接与验收，不是速度基准。日常这么小的修改通常直接由主 agent 完成。
 
-安装、目录位置与故障恢复见[安装说明](docs/install.md)，原理见[协作流程](docs/workflow.md)，速度与质量证据见[评测记录](docs/evaluation.md)。目前没有证明这套流程普遍快于 Luna。
+[练习文件与任务契约](examples/mini-project/README.md)。
 
-此版本暂未启用 GitHub 自动测试，可在仓库目录运行 `npm test` 做本地验证。
+</details>
 
-MIT 许可。底层来源与适配说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+## 常用命令
+
+在仓库目录运行：
+
+| 命令 | 用途 |
+| :--- | :--- |
+| `node bin/codex-ds-workers.mjs doctor` | 检查本地运行时健康状态。 |
+| `node bin/codex-ds-workers.mjs status` | 查看服务状态。 |
+| `node bin/codex-ds-workers.mjs start` | 启动后台 bridge，包括重启电脑后恢复运行。 |
+| `node bin/codex-ds-workers.mjs rpc < request.json` | 通过 JSON 标准输入调用 bridge 工具。 |
+| `node bin/codex-ds-workers.mjs uninstall` | 移除本安装拥有的集成，保留 key 与历史。 |
+
+取消任务时，让 Codex 对对应的 worker ID 调用 `dsh_interrupt`，并核对返回的中断回执。停止 Codex 回合本身不能证明 DS 已停止。详见[工具生命周期与 RPC 路径](skills/dsh-subagent/references/runtime.md#mcp-lifecycle)。
+
+此版本暂未启用 GitHub 自动测试。在本地运行 `npm test`，详见[开发检查](CONTRIBUTING.md)。
+
+## 文档导航
+
+| 你想要…… | 对应文档 |
+| :--- | :--- |
+| 安装、隔离配置或恢复运行时 | [安装指南](docs/install.md) |
+| 理解任务归属、并行与完成处理 | [协作流程](docs/workflow.md) |
+| 写清任务交接与结果验收要求 | [任务与结果契约](skills/dsh-subagent/references/handoffs.md) |
+| 判断本地实测能支持什么结论 | [评测记录](docs/evaluation.md) |
+| 修改启动器或 skill | [贡献指南](CONTRIBUTING.md) |
+
+## 来源与许可
+
+底层复用 [dsh-subagent-mcp](https://github.com/dqtz5vpvj9-create/dsh-subagent-mcp) 和 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)。本仓库在固定版本的上游 bridge 外，提供自适应 skill、可移植安装入口和 SDK 兼容适配器。
+
+[MIT](LICENSE) · [第三方来源说明](THIRD_PARTY_NOTICES.md)。这是独立集成，不代表上游作者或模型提供商背书。仓库不包含 API key、私有对话或个人基准工作区。

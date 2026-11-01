@@ -1,30 +1,46 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.svg">
+    <img src="docs/assets/hero.svg" alt="Codex leads. DeepSeek executes. Independent tasks, persistent workers, reviewed results." width="100%">
+  </picture>
+</p>
+
 <h1 align="center">Codex DS Workers</h1>
 
 <p align="center">
   Persistent DeepSeek workers for your Codex workflow.<br>
-  <strong>Delegate independent work. Keep decisions and review in Codex.</strong>
+  <strong>Delegate independent tasks. Keep decisions and acceptance in Codex.</strong>
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick start</a> &nbsp;·&nbsp;
-  <a href="docs/workflow.md">Workflow</a> &nbsp;·&nbsp;
-  <a href="docs/evaluation.md">Evaluation</a> &nbsp;·&nbsp;
-  <a href="README.zh-CN.md">中文</a>
+  <a href="#quick-start">Quick start</a> &nbsp; / &nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp; / &nbsp;
+  <a href="docs/evaluation.md">Evaluation</a> &nbsp; / &nbsp;
+  <a href="README.zh-CN.md">简体中文</a>
 </p>
-
-<p align="center"><code>Node.js 24+</code> &nbsp; <code>Codex skill + MCP</code> &nbsp; <code>MIT</code></p>
 
 <p align="center">
-  <img src="docs/assets/workflow.svg" alt="Codex defines two independent tasks, DeepSeek executes them in isolated workspaces, and the parent reviews the results before integration." width="880">
+  <a href="docs/install.md"><img src="docs/assets/badge-node.svg" alt="Requires Node.js 24 or newer"></a>
+  <img src="docs/assets/badge-mcp.svg" alt="Codex skill and MCP integration">
+  <a href="LICENSE"><img src="docs/assets/badge-license.svg" alt="MIT license"></a>
 </p>
 
-Give bounded tasks to persistent DeepSeek Harness workers while Codex handles the critical path. Review results as they arrive, repair concrete defects, and integrate accepted changes.
+Give a worker a complete task, let Codex continue the main work, and review the result when it arrives. Workers keep their sessions for follow-up, so a concrete correction can return to the same worker with its context intact.
 
-Use your existing **Codex login** and a **DeepSeek API key**. DS worker calls use separate API billing. Built on [dsh-subagent-mcp](https://github.com/dqtz5vpvj9-create/dsh-subagent-mcp) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness).
+| Capability | What it gives you |
+| :--- | :--- |
+| **Persistent sessions** | Continue a worker's task without starting the conversation over. |
+| **Isolated execution** | Assign explicit file ownership and separate writable workspaces before dispatch. |
+| **Adaptive effort** | Choose `low`, `high`, or `max` to match a bounded task. |
+| **Parent review** | Check the contract, actual diff, and failure paths before accepting changes. |
 
 ## Quick start
 
-You need **Node.js 24+, npm, Git**, and network access to GitHub and npm. The initial targets are macOS and Linux; macOS has been exercised with a real isolated install. See [installation details](docs/install.md) for platform coverage and existing-installation conflicts.
+You need **Node.js 24+, npm, Git**, an existing **Codex login**, and a **DeepSeek API key**, with network access to GitHub and npm. DeepSeek calls use separate API billing.
+
+The initial targets are macOS and Linux. macOS has a recorded isolated-install check; Linux needs its own host validation. [Platform coverage and installation details](docs/install.md).
+
+### 1. Install and configure
 
 ```bash
 git clone https://github.com/Nahuyiur/codex-ds-workers.git
@@ -34,9 +50,13 @@ node bin/codex-ds-workers.mjs configure
 node bin/codex-ds-workers.mjs doctor
 ```
 
-`setup` installs the pinned bridge and SDK, registers the local MCP server, and installs the skill. It submits no model task. `configure` asks for the key privately in your terminal. Keep the key out of commands and chat messages, and keep the checkout after installation because its launcher and adapters remain in use.
+`setup` installs the pinned bridge and SDK, registers the local MCP server, and installs the skill. It submits no model task. `configure` prompts for the key privately in your terminal. Keep the key out of commands and chat messages.
 
-Open a **new Codex chat** so the MCP tools and skill can load. Try a read-only task first:
+Keep the checkout after installation: lifecycle commands still use its launcher. If you already have a `dsh_subagent` installation, setup preserves it and stops on conflicts. See [isolated profiles and recovery](docs/install.md#existing-installations).
+
+### 2. Open a new Codex chat
+
+A new chat lets the skill and MCP tools load. Start with a read-only task:
 
 ```text
 Use $dsh-subagent to have one DeepSeek worker trace this project's
@@ -44,35 +64,54 @@ configuration-loading path. Keep it read-only and return file references.
 Check the evidence before accepting the answer.
 ```
 
-**Expected result:** a worker ID you can continue and a result with file evidence. DS activity can appear as MCP results rather than a native GPT subagent card. If MCP tools have not loaded, the skill can use the installed CLI's `rpc` fallback.
+You should get a **worker ID you can continue** and a result with file evidence. Worker activity can appear as MCP results instead of a native GPT subagent card. If MCP tools have not loaded, the skill can use the installed CLI's `rpc` fallback.
 
-## Give workers complete tasks
+## How it works
 
-| Codex owns | DeepSeek executes |
-|---|---|
-| Scope, interfaces, risk, and model selection | Bounded code investigation with file evidence |
-| Ambiguous or tightly coupled reasoning | Independent modules with explicit contracts |
-| Review, integration, and final acceptance | Reproducers, test cases, and mechanical changes |
+<p align="center">
+  <picture>
+    <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset="docs/assets/workflow-dark.svg">
+    <source media="(prefers-reduced-motion: reduce)" srcset="docs/assets/workflow.svg">
+    <img src="docs/assets/workflow.gif" alt="Illustrated workflow: Codex defines a task, two DeepSeek workers execute in parallel, and Codex reviews their results before integration. This animation is a schematic, not a recorded run." width="100%">
+  </picture>
+</p>
 
-The parent chooses `low`, `high`, or `max` explicitly. Start with `low` for bounded execution, use `high` for reasoning-heavy work, and reserve `max` for a specific escalation. Difficult work can use a suitable native GPT worker, ordinarily no more capable than the parent when that comparison is known.
+<p align="center">
+  <a href="docs/assets/workflow.svg">Static diagram</a> &nbsp; / &nbsp;
+  <a href="docs/assets/workflow.mp4">MP4</a> &nbsp; / &nbsp;
+  <a href="docs/workflow.md">Full workflow</a>
+</p>
 
-Start with **at most two delegated actors**. Give writable workers separate workspaces and fix shared interfaces before dispatch. The parent continues useful independent work and reviews early completions. A native relay and its DS worker count as two actors.
+Codex owns scope, shared interfaces, risk, model selection, and final acceptance. DeepSeek handles bounded investigations, independent modules, reproducers, and mechanical changes. Keep ambiguous requirements and tightly coupled reasoning with the parent or a suitable native GPT worker.
 
-## Review before integration
+Start with **at most two delegated actors**. Fix shared interfaces before dispatch, give writable workers separate workspaces, and review early completions while other independent work continues. A native relay and its DS worker count as two actors.
 
-1. Define acceptance commands, critical invariants, ownership, and protected inputs before dispatch.
-2. Inspect the returned diff and checks against the contract. Check failure paths as well as successful output.
-3. Consolidate defects into one repair round. Allow at most two before escalation or repartition.
-4. Run integration checks after bringing accepted changes together.
+### Choose the effort
+
+| Effort | Use it for |
+| :--- | :--- |
+| `low` | Bounded execution with clear inputs and checks. Start here. |
+| `high` | A defined task that needs substantial reasoning. |
+| `max` | A specific unresolved difficulty that merits escalation. |
+
+The parent selects effort explicitly. A follow-up keeps the original model, effort, and preset; changing effort requires a new session with a concise handoff. These choices are a working policy, not a measured capability ranking.
+
+### Review before integration
+
+1. Define the deliverable, allowed files, protected inputs, and acceptance commands before dispatch.
+2. Inspect the actual diff and meaningful checks, including failure and recovery paths.
+3. Send one consolidated repair brief for concrete defects. Allow at most two repair rounds before escalation or repartition.
+4. Integrate accepted changes and run the integration checks.
 
 > [!NOTE]
-> The skill guides agent behavior; it is not a hard scheduler or a correctness guarantee. Keep project tests and parent review in the loop.
+> The skill guides agent behavior. It is not a hard scheduler or a correctness guarantee.
 
-In the local evaluation, a repair passed all 38 frozen checks but still omitted a contract requirement. Parent diff review caught it; a second repair passed four additional contract checks. [Read the results and limits →](docs/evaluation.md)
+In the local evaluation, one repair passed all **38 frozen checks** but still missed a contract requirement. Parent diff review found the omission; a second repair passed **four additional contract checks**. The study shows a working review loop, with no evidence of a general speed advantage over native Luna. [Results, conditions, and limits](docs/evaluation.md).
 
-## Try an isolated coding exercise
+<details>
+<summary><strong>Try the two-worker coding exercise</strong></summary>
 
-Ask Codex:
+Use the included miniature Python project to practice isolated handoffs and acceptance:
 
 ```text
 Use $dsh-subagent for the onboarding exercise in examples/mini-project.
@@ -83,26 +122,40 @@ python3 verify.py. Report total elapsed time and each role's usage when
 the provider exposes it. Do not publish or send anything externally.
 ```
 
-This deliberately small example exercises handoffs and acceptance. It is not a speed benchmark; ordinary edits this small usually stay with the parent.
+This deliberately small exercise checks the handoff and acceptance process. It is not a speed benchmark; ordinary edits this small usually stay with the parent.
 
-## Commands and maintenance
+[Exercise files and contract](examples/mini-project/README.md).
 
-Run these commands from the checkout:
+</details>
+
+## Commands
+
+Run these from the checkout:
 
 | Command | Purpose |
-|---|---|
-| `node bin/codex-ds-workers.mjs doctor` | Check local runtime health |
-| `node bin/codex-ds-workers.mjs status` | Inspect service state |
-| `node bin/codex-ds-workers.mjs start` | Start the background bridge, including after reboot |
-| `node bin/codex-ds-workers.mjs rpc < request.json` | Call a bridge tool through JSON stdin |
-| `node bin/codex-ds-workers.mjs uninstall` | Remove the owned integration; retain keys and history |
+| :--- | :--- |
+| `node bin/codex-ds-workers.mjs doctor` | Check local runtime health. |
+| `node bin/codex-ds-workers.mjs status` | Inspect service state. |
+| `node bin/codex-ds-workers.mjs start` | Start the background bridge, including after reboot. |
+| `node bin/codex-ds-workers.mjs rpc < request.json` | Call a bridge tool through JSON stdin. |
+| `node bin/codex-ds-workers.mjs uninstall` | Remove the owned integration; retain keys and history. |
+
+To cancel a task, ask Codex to call `dsh_interrupt` for the worker ID and verify the returned acknowledgement. Stopping a Codex turn alone does not establish that DS stopped. See [tool lifecycle and RPC fallback](skills/dsh-subagent/references/runtime.md#mcp-lifecycle).
 
 Hosted CI is not enabled in this release. Run `npm test` locally; see [development checks](CONTRIBUTING.md).
 
-Same-session follow-ups keep their original model and effort; changing effort requires a new session with a concise handoff. On cancellation, interrupt the external DS worker and verify acknowledgement. Stopping a Codex turn alone does not establish that DS stopped.
+## Documentation
 
-[Installation and recovery](docs/install.md) · [Task and result contracts](skills/dsh-subagent/references/handoffs.md) · [Development checks](CONTRIBUTING.md)
+| If you want to… | Read |
+| :--- | :--- |
+| Install, isolate a profile, or recover the runtime | [Installation guide](docs/install.md) |
+| Understand ownership, concurrency, and completion | [Workflow guide](docs/workflow.md) |
+| Write a complete task brief and review a result | [Task and result contracts](skills/dsh-subagent/references/handoffs.md) |
+| Assess the local study and its limitations | [Evaluation](docs/evaluation.md) |
+| Change the bootstrap or skill | [Contributing](CONTRIBUTING.md) |
 
 ## Credits and license
 
-MIT. This repository adds the adaptive skill, portable bootstrap, and SDK compatibility adapter around a pinned upstream bridge. See [third-party notices](THIRD_PARTY_NOTICES.md). No API key, private conversation, or personal benchmark checkout is distributed.
+Built on [dsh-subagent-mcp](https://github.com/dqtz5vpvj9-create/dsh-subagent-mcp) and [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). This repository adds the adaptive skill, portable bootstrap, and SDK compatibility adapter around a pinned upstream bridge.
+
+[MIT](LICENSE) · [Third-party notices](THIRD_PARTY_NOTICES.md). An independent integration, with no claimed endorsement by the upstream authors or model providers. No API keys, private conversations, or personal benchmark checkouts are distributed.

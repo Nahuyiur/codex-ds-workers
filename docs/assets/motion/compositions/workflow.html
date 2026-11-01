@@ -1,0 +1,45 @@
+<template>
+<style>@font-face{font-family:Editorial;src:local('Georgia');font-weight:400}
+#root{position:absolute;inset:0;color:#252520;font-family:Inter,Arial,sans-serif}
+.ground{position:absolute;inset:0;background:var(--paper,#f6f3ec)}
+.clip{position:absolute;inset:0;z-index:2}.headline{position:absolute;left:48px;top:76px;margin:0;font:64px/1.1 Editorial,serif;letter-spacing:-2px}
+.subline{position:absolute;left:48px;bottom:28px;margin:0;font:20px/1.3 Inter,Arial,sans-serif;color:#626159}
+.art{position:absolute;inset:0;width:1280px;height:552px;z-index:1}
+.serif{font-family:Editorial,serif}.sans{font-family:Inter,Arial,sans-serif}.mono{font-family:'IBM Plex Mono',monospace}
+.progress{stroke:#b43c25;stroke:var(--accent,#b43c25);stroke-width:3;fill:none;stroke-dasharray:1;stroke-dashoffset:1}
+.meter,.review-check{stroke-dasharray:1;stroke-dashoffset:1}</style>
+<div id="root" data-composition-id="workflow" data-width="1280" data-height="552"><div class="ground"></div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 552" role="img" aria-labelledby="workflow-title workflow-desc" id="workflow-root" class="art">
+<title id="workflow-title">A task leaves Codex. Acceptance stays with Codex.</title>
+<desc id="workflow-desc">Codex defines two tasks, DeepSeek workers execute in separate workspaces, and Codex reviews each result before integration, with a bounded repair loop.</desc>
+<defs>
+      <marker id="workflow-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#626159" stroke-width="1.4" stroke-linejoin="round" /></marker>
+</defs>
+<rect width="1280" height="552" fill="#f6f3ec" />
+<text x="48" y="52" class="mono" font-size="14" font-weight="500" fill="#b43c25" letter-spacing="2">CODEX DS WORKERS</text><text x="1232" y="52" class="mono" font-size="14" font-weight="400" fill="#626159" text-anchor="end">WORKFLOW SCHEMATIC / NOT A LIVE RUN</text><g fill="none" stroke="#626159" stroke-width="1.8" marker-end="url(#workflow-arrow)">
+<path d="M296 220 H388" id="dispatch-a" pathLength="1" class="progress" />
+<path d="M296 336 H388" id="dispatch-b" pathLength="1" class="progress" />
+<path d="M684 220 H800" id="return-a" pathLength="1" class="progress" />
+<path d="M684 336 H800" id="return-b" pathLength="1" class="progress" />
+<path d="M1048 280 H1124" id="integrate-path" pathLength="1" class="progress" />
+</g>
+<rect x="48" y="184" width="248" height="192" rx="8" fill="#252520" /><text x="72" y="224" class="sans" font-size="30" font-weight="600" fill="#f6f3ec">Codex</text><text x="72" y="264" class="sans" font-size="18" font-weight="400" fill="#f6f3ec">Scope + interfaces</text><text x="72" y="296" class="sans" font-size="18" font-weight="400" fill="#f6f3ec">Ownership + checks</text><text x="72" y="348" class="mono" font-size="14" font-weight="400" fill="#f6f3ec" letter-spacing="0.5">CONTINUES MAIN WORK</text><rect x="388" y="184" width="296" height="88" rx="8" fill="#fffcf6" stroke="#d5d0c5" /><text x="412" y="220" class="sans" font-size="22" font-weight="600" fill="#252520">DeepSeek worker A</text><text x="412" y="248" class="sans" font-size="16" font-weight="400" fill="#626159">Separate writable workspace</text><rect x="388" y="300" width="296" height="88" rx="8" fill="#fffcf6" stroke="#d5d0c5" /><text x="412" y="336" class="sans" font-size="22" font-weight="600" fill="#252520">DeepSeek worker B</text><text x="412" y="364" class="sans" font-size="16" font-weight="400" fill="#626159">Separate writable workspace</text><rect x="800" y="184" width="248" height="192" rx="8" fill="#eee5da" stroke="#b43c25" stroke-width="1.4" /><text x="824" y="224" class="sans" font-size="26" font-weight="600" fill="#252520">Codex review</text><text x="824" y="264" class="sans" font-size="18" font-weight="400" fill="#626159">Contract + diff</text><text x="824" y="296" class="sans" font-size="18" font-weight="400" fill="#626159">Failure paths</text><text x="824" y="348" class="mono" font-size="14" font-weight="500" fill="#b43c25">REVIEW AS RESULTS ARRIVE</text><rect x="1124" y="232" width="108" height="96" rx="8" fill="#fffcf6" stroke="#d5d0c5" /><rect x="412" y="260" width="248" height="3" fill="#d5d0c5" /><path id="meter-a" d="M412 260 H660" fill="none" stroke="#b43c25" class="meter" pathLength="1" stroke-width="3" /><rect x="412" y="376" width="248" height="3" fill="#d5d0c5" /><path id="meter-b" d="M412 376 H660" fill="none" stroke="#b43c25" class="meter" pathLength="1" stroke-width="3" /><path id="review-contract" d="M1010 256 L1016 262 L1028 248" fill="none" stroke="#b43c25" class="review-check" pathLength="1" stroke-width="2" /><path id="review-tests" d="M1010 288 L1016 294 L1028 280" fill="none" stroke="#b43c25" class="review-check" pathLength="1" stroke-width="2" /><g id="accept-copy"><text x="1178" y="270" class="sans" font-size="18" font-weight="600" fill="#252520" text-anchor="middle">Integrate</text><text x="1178" y="298" class="sans" font-size="16" font-weight="400" fill="#626159" text-anchor="middle">+ verify</text></g><g id="accepted" opacity="0"><rect x="1124" y="232" width="108" height="96" rx="8" fill="#252520" /><path d="M1152 276 L1170 294 L1204 256" fill="none" stroke="#f6f3ec" stroke-width="5" /></g><g id="phase-define" opacity="1"><text x="48" y="132" fill="#252520" class="serif" font-size="64" letter-spacing="-2" data-var-text="intro-title">Define the task.</text><text x="48" y="440" fill="#626159" class="sans" font-size="20">Codex sets scope, ownership, and checks.</text></g><g id="phase-execute" opacity="0"><text x="48" y="132" fill="#252520" class="serif" font-size="64" letter-spacing="-2">Work in parallel.</text><text x="48" y="440" fill="#626159" class="sans" font-size="20">Two workers. Separate writable workspaces.</text></g><g id="phase-review" opacity="0"><text x="48" y="132" fill="#252520" class="serif" font-size="64" letter-spacing="-2">Review each result.</text><text x="48" y="440" fill="#626159" class="sans" font-size="20">Check contracts, diffs, and failure paths.</text></g><g id="phase-accept" opacity="0"><text x="48" y="132" fill="#252520" class="serif" font-size="64" letter-spacing="-2">Accept, then integrate.</text><text x="48" y="440" fill="#626159" class="sans" font-size="20">Repair within bounds. Integrate and verify.</text></g></svg></div>
+<script>const tl=gsap.timeline({paused:true});
+tl.set('#phase-define',{opacity:0},2.4);
+tl.fromTo('#phase-execute',{opacity:0},{opacity:1,duration:0.12,ease:'none'},2.4);
+tl.set('#phase-execute',{opacity:0},4.6);
+tl.fromTo('#phase-review',{opacity:0},{opacity:1,duration:0.12,ease:'none'},4.6);
+tl.set('#phase-review',{opacity:0},7.3);
+tl.fromTo('#phase-accept',{opacity:0},{opacity:1,duration:0.12,ease:'none'},7.3);
+// Seekable stroke reveal follows the svg-line-draw-loader registry primitive.
+tl.fromTo('#dispatch-a,#dispatch-b',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.7,ease:'power2.inOut',stagger:0.12},0.8);
+tl.fromTo('#meter-a',{strokeDashoffset:1},{strokeDashoffset:0,duration:1.8,ease:'none'},2.4);
+tl.fromTo('#meter-b',{strokeDashoffset:1},{strokeDashoffset:0,duration:2.1,ease:'none'},2.4);
+tl.fromTo('#return-a',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.6,ease:'power2.inOut'},4.2);
+tl.fromTo('#return-b',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.6,ease:'power2.inOut'},4.5);
+tl.fromTo('#review-contract',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.4,ease:'power2.out'},5.3);
+tl.fromTo('#review-tests',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.4,ease:'power2.out'},6.2);
+tl.fromTo('#integrate-path',{strokeDashoffset:1},{strokeDashoffset:0,duration:0.6,ease:'power2.inOut'},7.3);
+tl.fromTo('#accept-copy',{opacity:1},{opacity:0,duration:0.2,ease:'none'},7.8);
+tl.fromTo('#accepted',{opacity:0},{opacity:1,duration:0.3,ease:'power2.out'},7.9);
+window.__timelines=window.__timelines||{};window.__timelines.workflow=tl;</script>
+</template>

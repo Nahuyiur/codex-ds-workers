@@ -1,0 +1,10 @@
+{
+  "name": "codex-ds-workers-readme-motion",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "HYPERFRAMES_NO_TELEMETRY=1 npx --yes hyperframes@0.8.223 preview",
+    "check": "HYPERFRAMES_NO_TELEMETRY=1 npx --yes hyperframes@0.8.223 check",
+    "render": "HYPERFRAMES_NO_TELEMETRY=1 npx --yes hyperframes@0.8.223 render --quality delivery --fps 30 --no-page-side-compositing --output .hyperframes/workflow-master.mp4 && ffmpeg -v error -y -i .hyperframes/workflow-master.mp4 -vf crop=1280:464:0:0 -c:v libx264 -crf 16 -preset slow -pix_fmt yuv420p -movflags +faststart -an ../workflow.mp4"
+  }
+}
